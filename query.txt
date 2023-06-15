@@ -126,11 +126,13 @@ JOIN videogames v ON sh.id = v.software_house_id
 WHERE YEAR(v.release_date) > 2020
 
 -- 5- Selezionare i premi ricevuti da ogni software house per i videogiochi che ha prodotto (55)
-SELECT a.*
+SELECT a.name
 FROM awards a
 JOIN award_videogame av ON a.id = av.award_id
 JOIN videogames v ON av.videogame_id= v.id
+JOIN software_houses sh ON v.software_house_id = sh.id
 
+*****************
 -- 6- Selezionare categorie e classificazioni PEGI dei videogiochi che hanno ricevuto recensioni da 4 e 5 stelle, mostrandole una sola volta (3363)
 SELECT DISTINCT c.name , pl.name 
 FROM categories c 
@@ -139,5 +141,43 @@ JOIN videogames v ON cv.videogame_id = v.id
 JOIN pegi_label_videogame plv ON v.id = plv.videogame_id 
 JOIN pegi_labels pl ON plv.pegi_label_id = pl.id 
 JOIN reviews r ON v.id = r.videogame_id 
-WHERE r.rating >3;
+WHERE r.rating >3 AND  r.videogame_id = v.id;
+*****************
+
+
+-- 7- Selezionare quali giochi erano presenti nei tornei nei quali hanno partecipato i giocatori il cui nome inizia per 'S' (474)
+-- videogame tournament players 
+SELECT DISTINCT v.*
+FROM videogames v 
+JOIN tournament_videogame tv ON v.id = tv.videogame_id
+JOIN tournaments t ON tv.tournament_id = t.id
+JOIN player_tournament pt ON t.id = pt.tournament_id
+JOIN players p ON pt.player_id = p.id
+WHERE p.name LIKE 's%'
+
+-- 8- Selezionare le città in cui è stato giocato il gioco dell'anno del 2018 (36)
+-- videogioco - tournamet- award
+SELECT t.city, av.year
+FROM videogames v
+JOIN tournament_videogame tv ON v.id = tv.videogame_id
+JOIN tournaments t ON tv.tournament_id = t.id
+JOIN award_videogame av ON v.id = av.videogame_id
+JOIN awards a ON av.award_id = a.id
+WHERE a.name = 'Gioco dell\'anno' AND av.year = 2018
+
+-- 9- Selezionare i giocatori che hanno giocato al gioco più atteso del 2018 in un torneo del 2019 (3306)
+-- players- awards-tournaments- videogame
+SELECT p.*
+FROM videogames v  
+JOIN award_videogame av ON v.id = av.videogame_id
+JOIN awards a ON av.award_id = a.id
+JOIN tournament_videogame tv ON v.id = tv.videogame_id
+JOIN tournaments t ON tv.tournament_id = t.id
+JOIN player_tournament pt ON t.id = pt.tournament_id
+JOIN players p ON pt.player_id = p.id
+WHERE a.id = 5 AND t.year = 2019 AND av.year = 2018; 
+
+
+
+
 
